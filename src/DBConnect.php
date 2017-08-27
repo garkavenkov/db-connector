@@ -202,6 +202,16 @@ class DBConnect
         return null;
     }
 
+    public function getLastInsertedId()
+    {
+        try {
+            return $this->dbh->lastInsertId();
+        } catch (\PDOException $e) {
+            die("Error: " . $e->getMessage());
+        }
+
+    }
+
     /**
      * Prevent cloning of the 'Singleton' instance
      *
