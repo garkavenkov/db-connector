@@ -118,6 +118,7 @@ class DBConnect
 
     /**
      * Executes an SQL statement
+     *
      * @param  string       $sql SQL statement
      * @return PDOStatement      Result set
      */
@@ -130,6 +131,7 @@ class DBConnect
 
     /**
      * Gets row from result set
+     *
      * @param  Fetch style $fetch_method Fetch style
      * @return mixed    Record from result set depend on fetch style
      */
@@ -143,6 +145,7 @@ class DBConnect
 
     /**
      * Gets rows from result set
+     *
      * @param  Fetch style $fetch_method Fetch style
      * @return mixed    Records from result set depend on fetch style
      */
@@ -156,6 +159,7 @@ class DBConnect
 
     /**
      * Prepares and executes SQL statement
+     *
      * @param  string $sql    SQL statement
      * @param  array $params  Parameters as an associative array
      * @return self
@@ -174,6 +178,7 @@ class DBConnect
 
     /**
      * Gets field's value
+     *
      * @param  string $field_name Field's name
      * @return mixed              Field's value
      */
@@ -192,6 +197,7 @@ class DBConnect
 
     /**
      * Return the number of rows affected by the last SQL statement
+     *
      * @return int  Number of rows
      */
     public function rowCount()
@@ -204,6 +210,7 @@ class DBConnect
 
     /**
      * Returns Id from last inserted record
+     *
      * @return int  Id
      */
     public function getLastInsertedId()
@@ -213,6 +220,16 @@ class DBConnect
         } catch (\PDOException $e) {
             die("Error: " . $e->getMessage());
         }
+    }
+
+    /**
+     * Returns an array of available PDO drivers
+     *
+     * @return array    Available PDO drivers
+     */
+    public function getAvailableDrivers()
+    {
+        return $this->dbh->getAvailableDrivers();
     }
 
     /**
