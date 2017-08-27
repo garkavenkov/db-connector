@@ -28,6 +28,8 @@ class DBConnect
      */
     private static $conn;
 
+    private $stmt;
+
     /**
      * Makes an instance available as a singleton
      *
@@ -102,6 +104,28 @@ class DBConnect
         } catch (\PDOException $e) {
             die($e->getMessage());
         }
+    }
+
+    /**
+     * Closes cursor for next execution
+     */
+    private function closeCursor()
+    {
+        if ($this->stmt) {
+            $this->stmt->closeCursor();
+        }
+    }
+
+    /**
+     * Executes an SQL statement
+     * @param  string       $sql SQL statement
+     * @return PDOStatement      Result set
+     */
+    public function query(string $sql)
+    {
+        $this->closeCursor();
+        $this->stmt = $this->dbh->query($sql);
+        return $this;
     }
 
     /**
