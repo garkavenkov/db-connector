@@ -155,6 +155,24 @@ class DBConnect
     }
 
     /**
+     * Prepares and executes SQL statement
+     * @param  string $sql    SQL statement
+     * @param  array $params  Parameters as an associative array
+     * @return self
+     */
+    public function execute(string $sql, array $params)
+    {
+        $this->closeCursor();
+        try {
+            $this->stmt = $this->dbh->prepare($sql);
+            $this->stmt->execute($params);
+            return $this;
+        } catch (\PDOException $e) {
+            die("Error: " . $e->getMessage());
+        }
+    }
+
+    /**
      * Prevent cloning of the 'Singleton' instance
      *
      * @return void
