@@ -202,6 +202,10 @@ class DBConnect
         return null;
     }
 
+    /**
+     * Returns Id from last inserted record
+     * @return int  Id
+     */
     public function getLastInsertedId()
     {
         try {
@@ -209,7 +213,6 @@ class DBConnect
         } catch (\PDOException $e) {
             die("Error: " . $e->getMessage());
         }
-
     }
 
     /**
