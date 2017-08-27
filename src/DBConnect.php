@@ -173,6 +173,24 @@ class DBConnect
     }
 
     /**
+     * Gets field's value
+     * @param  string $field_name Field's name
+     * @return mixed              Field's value
+     */
+    public function getFieldValue(string $field_name)
+    {
+        try {
+            if (array_key_exists($field_name, $this->stmt->fetch(\PDO::FETCH_ASSOC))) {
+                return $this->stmt->fetch(\PDO::FETCH_ASSOC)[$field_name];
+            } else {
+                return null;
+            }
+        } catch (\PDOException $e) {
+            die('Error: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Prevent cloning of the 'Singleton' instance
      *
      * @return void
