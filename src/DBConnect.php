@@ -191,6 +191,18 @@ class DBConnect
     }
 
     /**
+     * Return the number of rows affected by the last SQL statement
+     * @return int  Number of rows
+     */
+    public function rowCount()
+    {
+        if ($this->stmt) {
+            return $this->stmt->rowCount();
+        }
+        return null;
+    }
+
+    /**
      * Prevent cloning of the 'Singleton' instance
      *
      * @return void
