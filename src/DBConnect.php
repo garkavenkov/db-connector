@@ -100,7 +100,6 @@ class DBConnect
                 \PDO::ATTR_ERRMODE,
                 \PDO::ERRMODE_EXCEPTION
             );
-            $this->dbh->query('SET NAMES utf8');
         } catch (\PDOException $e) {
             die($e->getMessage());
         }
@@ -185,8 +184,9 @@ class DBConnect
     public function getFieldValue(string $field_name)
     {
         try {
-            if (array_key_exists($field_name, $this->stmt->fetch(\PDO::FETCH_ASSOC))) {
-                return $this->stmt->fetch(\PDO::FETCH_ASSOC)[$field_name];
+            $fields = $this->stmt->fetch(\PDO::FETCH_ASSOC);
+            if (array_key_exists($field_name, $fields)) {
+                return $fields[$field_name];
             } else {
                 return null;
             }
