@@ -140,7 +140,7 @@ class DBConfig
                 $dns .= $db_port .
                         ";dbname=" .
                         $db_schema;
-            } elseif ($db_driver === 'slite') {
+            } elseif ($db_driver === 'sqlite') {
                 // In case database type is sqlite,
                 // 'dbname' param stores path to the database file.
                 $dns =  $db_driver . ':'. $db_schema;
