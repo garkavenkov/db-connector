@@ -141,6 +141,18 @@ class DBConnect
         return $this->stmt->fetch($fetch_method);
     }
 
+    /**
+     * Gets rows from result set
+     * @param  Fetch style $fetch_method Fetch style
+     * @return mixed    Records from result set depend on fetch style
+     */
+    public function getRows($fetch_method = null)
+    {
+        if (is_null($fetch_method)) {
+            $fetch_method = \PDO::FETCH_ASSOC;
+        }
+        return $this->stmt->fetchAll($fetch_method);
+    }
 
     /**
      * Prevent cloning of the 'Singleton' instance
