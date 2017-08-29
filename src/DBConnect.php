@@ -28,6 +28,11 @@ class DBConnect
      */
     private static $conn;
 
+    /**
+     * Result set
+     *
+     * @var PDOStatement;
+     */
     private $stmt;
 
     /**
@@ -100,8 +105,8 @@ class DBConnect
                 \PDO::ATTR_ERRMODE,
                 \PDO::ERRMODE_EXCEPTION
             );
-        } catch (\PDOException $e) {
-            die($e->getMessage());
+        } catch (\PDOException $e) {            
+            die("Error: " . $e->getMessage());
         }
     }
 
@@ -110,57 +115,74 @@ class DBConnect
      */
     private function closeCursor()
     {
-        if ($this->stmt) {
-            $this->stmt->closeCursor();
+        try {
+            if ($this->stmt) {
+                $this->stmt->closeCursor();
+            }
+        } catch (\PDOException $e) {
+            die("Error: " . $e->getMessage());
         }
+        
     }
 
     /**
      * Executes an SQL statement
      *
      * @param  string       $sql SQL statement
-     * @return PDOStatement      Result set
+     * @return $this
      */
     public function query(string $sql)
     {
         $this->closeCursor();
-        $this->stmt = $this->dbh->query($sql);
-        return $this;
+        try {            
+            $this->stmt = $this->dbh->query($sql);
+            return $this;
+        } catch (\PDOException $e) {
+            die("Error: " . $e->getMessage());
+        }
     }
 
     /**
-     * Gets row from result set
+     * Returns a row from a result set
      *
-     * @param  Fetch style $fetch_method Fetch style
-     * @return mixed    Record from result set depend on fetch style
+     * @param  int   $fetch_style   PDO fetch style
+     * @return mixed                Record from result set depending on PDO fetch style
      */
-    public function getRow($fetch_method = null)
+    public function getRow($fetch_style = null)
     {
-        if (is_null($fetch_method)) {
+        if (is_null($fetch_style)) {
             $fetch_method = \PDO::FETCH_ASSOC;
         }
-        return $this->stmt->fetch($fetch_method);
+        try {
+            return $this->stmt->fetch($fetch_style);
+        } catch (\PDOException $e) {
+            die("Error: " . $e->getMessage());
+        }
     }
 
     /**
-     * Gets rows from result set
+     * Returns rows from a result set
      *
-     * @param  Fetch style $fetch_method Fetch style
-     * @return mixed    Records from result set depend on fetch style
+     * @param  int    $fetch_style    PDO fetch style
+     * @return mixed  Records from result set depending on PDO fetch style
      */
-    public function getRows($fetch_method = null)
+    public function getRows($fetch_style = null)
     {
-        if (is_null($fetch_method)) {
-            $fetch_method = \PDO::FETCH_ASSOC;
+        if (is_null($fetch_style)) {
+            $fetch_style = \PDO::FETCH_ASSOC;
         }
-        return $this->stmt->fetchAll($fetch_method);
+        try {
+            return $this->stmt->fetchAll($fetch_style);
+        } catch (\PDOException $e) {
+            die("Error: " . $e->getMessage());
+        }
     }
 
     /**
      * Prepares and executes SQL statement
      *
-     * @param  string $sql    SQL statement
-     * @param  array $params  Parameters as an associative array
+     * @param  string $sql     SQL statement
+     * @param  array  $params  Parameters as an associative array
      * @return self
      */
     public function execute(string $sql, array $params)
@@ -176,7 +198,7 @@ class DBConnect
     }
 
     /**
-     * Gets field's value
+     * Returns field's value
      *
      * @param  string $field_name Field's name
      * @return mixed              Field's value
@@ -184,28 +206,62 @@ class DBConnect
     public function getFieldValue(string $field_name)
     {
         try {
+            $value = null;
             $fields = $this->stmt->fetch(\PDO::FETCH_ASSOC);
             if (array_key_exists($field_name, $fields)) {
-                return $fields[$field_name];
+                $value = $fields[$field_name];
             } else {
-                return null;
+                throw new \Exception("Field '$field_name' is not present in the current result set.\n");
             }
+            return $value;
         } catch (\PDOException $e) {
             die('Error: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            die("Error: " . $e->getMessage());
         }
     }
 
     /**
-     * Return the number of rows affected by the last SQL statement
+     * Returns field's values
+     *
+     * @param string $field_name    Field's name
+     * @return array                Array with field's values
+     */
+    public function getFieldValues(string $field_name)
+    {
+        try {
+            $field = [];
+            $result = $this->stmt->fetchAll(\PDO::FETCH_ASSOC);
+            if (array_key_exists($field_name, $result[0])) {
+                foreach ($result as $row) {
+                    $field[] = $row[$field_name];
+                }
+            } else {
+                throw new \Exception("Field '$field_name' is not present in the current result set.\n");
+            }
+            return $field;
+        } catch (\PDOException $e) {
+            die('Error: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            die("Error: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Returns the number of rows affected by the last SQL statement
      *
      * @return int  Number of rows
      */
     public function rowCount()
     {
-        if ($this->stmt) {
-            return $this->stmt->rowCount();
+        try {
+            if ($this->stmt) {
+                return $this->stmt->rowCount();
+            }
+            return null;
+        } catch (\PDOException $e) {
+            die("Error: " . $e->getMessage());
         }
-        return null;
     }
 
     /**
@@ -229,11 +285,15 @@ class DBConnect
      */
     public function getAvailableDrivers()
     {
-        return $this->dbh->getAvailableDrivers();
+        try {
+            return $this->dbh->getAvailableDrivers();
+        } catch (\PDException $e) {
+            die("Error: " . $e->getMessage());
+        }
     }
 
     /**
-     * Prevent cloning of the 'Singleton' instance
+     * Prevents cloning of the 'Singleton' instance
      *
      * @return void
      */
@@ -242,7 +302,7 @@ class DBConnect
     }
 
     /**
-     * Prevent unserializing of the 'Singleton' instance
+     * Prevents unserializing of the 'Singleton' instance
      *
      * @return void
      */
