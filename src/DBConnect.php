@@ -115,6 +115,8 @@ class DBConnect
      */
     private function closeCursor()
     {
+        echo "Close cursor." . PHP_EOL;
+        var_dump($this->stmt);
         try {
             if ($this->stmt) {
                 $this->stmt->closeCursor();
@@ -133,7 +135,7 @@ class DBConnect
      */
     public function query(string $sql)
     {
-        $this->closeCursor();
+        // $this->closeCursor();
         try {            
             $this->stmt = $this->dbh->query($sql);
             return $this;
@@ -179,19 +181,64 @@ class DBConnect
     }
 
     /**
-     * Prepares and executes SQL statement
+     * Prepares an SQL statement
      *
-     * @param  string $sql     SQL statement
+     * @param  string $sql     SQL statement     
+     * @return self
+     */
+    public function prepare(string $sql, $alone = false)
+    {
+        // Close previous PDO statement
+        // $this->closeCursor();
+        try {
+            $stmt = $this->dbh->prepare($sql);            
+            // $this->dbh->prepare($sql);
+            if ($alone) {
+                return $stmt;
+            } else {
+                $this->stmt = $stmt;
+            }
+            return $this;
+        } catch (\PDOException $e) {
+            die("Error: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Executes an SQL statement
+     *     
      * @param  array  $params  Parameters as an associative array
      * @return self
      */
-    public function execute(string $sql, array $params)
+    public function execute(array $params, $stmt = null)
     {
-        $this->closeCursor();
         try {
-            $this->stmt = $this->dbh->prepare($sql);
-            $this->stmt->execute($params);
+            if (!is_null($stmt)) {
+                $this->stmt = $stmt->execute($params);
+            } else {
+                if (!$this->stmt) {
+                    throw new \Exception("Prepared stetement not found.");
+                }
+                $this->stmt->execute($params);
+            }
             return $this;
+        } catch (\PDOException $e) {
+            die("Error: " . $e->getMessage());
+        } catch (\Exception $e) {
+            die("Error: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Execute an SQL statement and return the number of affected rows 
+     *
+     * @param string $sql SQL satement
+     * @return int        Number of rows
+     */
+    public function exec(string $sql)
+    {
+        try {
+            return $this->dbh->exec($sql);
         } catch (\PDOException $e) {
             die("Error: " . $e->getMessage());
         }
