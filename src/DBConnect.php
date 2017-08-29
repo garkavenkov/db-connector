@@ -105,7 +105,7 @@ class DBConnect
                 \PDO::ATTR_ERRMODE,
                 \PDO::ERRMODE_EXCEPTION
             );
-        } catch (\PDOException $e) {            
+        } catch (\PDOException $e) {
             die("Error: " . $e->getMessage());
         }
     }
@@ -115,8 +115,6 @@ class DBConnect
      */
     private function closeCursor()
     {
-        echo "Close cursor." . PHP_EOL;
-        var_dump($this->stmt);
         try {
             if ($this->stmt) {
                 $this->stmt->closeCursor();
@@ -124,7 +122,6 @@ class DBConnect
         } catch (\PDOException $e) {
             die("Error: " . $e->getMessage());
         }
-        
     }
 
     /**
@@ -135,9 +132,8 @@ class DBConnect
      */
     public function query(string $sql)
     {
-        // $this->closeCursor();
-        try {            
-            $this->stmt = $this->dbh->query($sql);
+        try {
+            $this->stmt = $this->dbh->query($sql);            
             return $this;
         } catch (\PDOException $e) {
             die("Error: " . $e->getMessage());
@@ -183,16 +179,13 @@ class DBConnect
     /**
      * Prepares an SQL statement
      *
-     * @param  string $sql     SQL statement     
+     * @param  string $sql     SQL statement
      * @return self
      */
     public function prepare(string $sql, $alone = false)
     {
-        // Close previous PDO statement
-        // $this->closeCursor();
         try {
-            $stmt = $this->dbh->prepare($sql);            
-            // $this->dbh->prepare($sql);
+            $stmt = $this->dbh->prepare($sql);
             if ($alone) {
                 return $stmt;
             } else {
@@ -206,7 +199,7 @@ class DBConnect
 
     /**
      * Executes an SQL statement
-     *     
+     *
      * @param  array  $params  Parameters as an associative array
      * @return self
      */
@@ -230,7 +223,7 @@ class DBConnect
     }
 
     /**
-     * Execute an SQL statement and return the number of affected rows 
+     * Execute an SQL statement and return the number of affected rows
      *
      * @param string $sql SQL satement
      * @return int        Number of rows
