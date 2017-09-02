@@ -141,7 +141,7 @@ class DBConnect
     }
 
     /**
-     * Returns a row from a result set
+     * Returns a next row from a result set
      *
      * @param  int   $fetch_style   PDO fetch style
      * @return mixed                Record from result set depending on PDO fetch style
@@ -149,7 +149,7 @@ class DBConnect
     public function getRow($fetch_style = null)
     {
         if (is_null($fetch_style)) {
-            $fetch_method = \PDO::FETCH_ASSOC;
+            $fetch_style = \PDO::FETCH_ASSOC;
         }
         try {
             return $this->stmt->fetch($fetch_style);
@@ -159,10 +159,10 @@ class DBConnect
     }
 
     /**
-     * Returns rows from a result set
+     * Returns an array containing all of the result set rows
      *
      * @param  int    $fetch_style    PDO fetch style
-     * @return mixed  Records from result set depending on PDO fetch style
+     * @return array  Records from result set depending on PDO fetch style
      */
     public function getRows($fetch_style = null)
     {
@@ -179,14 +179,15 @@ class DBConnect
     /**
      * Prepares an SQL statement
      *
-     * @param  string $sql     SQL statement
+     * @param  string  $sql         SQL statement
+     * @param  boolean $standalone  
      * @return self
      */
-    public function prepare(string $sql, $alone = false)
+    public function prepare(string $sql, $standalone = false)
     {
         try {
             $stmt = $this->dbh->prepare($sql);
-            if ($alone) {
+            if ($standalone) {
                 return $stmt;
             } else {
                 $this->stmt = $stmt;
@@ -201,6 +202,7 @@ class DBConnect
      * Executes an SQL statement
      *
      * @param  array  $params  Parameters as an associative array
+     * @param  PDO statememt  $stmt  Prepared statement
      * @return self
      */
     public function execute(array $params, $stmt = null)
@@ -223,7 +225,7 @@ class DBConnect
     }
 
     /**
-     * Execute an SQL statement and return the number of affected rows
+     * Executes an SQL statement and returns the number of affected rows
      *
      * @param string $sql SQL satement
      * @return int        Number of rows

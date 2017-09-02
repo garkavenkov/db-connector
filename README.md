@@ -1,5 +1,6 @@
 # db-connector
-Wrapper for PDO
+**DBConnect** - Class-wrapper for PDO Class.   
+**DBConfig**  - Class-initializator for database configuration.
 
 ## Installation
 
@@ -9,14 +10,16 @@ Use [Composer](https://getcomposer.org "Composer")
 
 ## Usage
 
-### Initiation
+### Initialization
 
-You can define database configuration parameters as **constants**
+There are two ways to set database configuration parameters. First one is through **constants**.
 
 ```php
 <?php
 
 require ('./vendor/autoload.php');
+
+use DBConnector\DBConnect;
 
 define('DB_USERNAME', 'username');
 define('DB_PASSWORD', 'password');
@@ -24,18 +27,18 @@ define('DB_SCHEMA'  , 'schema_name');
 define('DB_DRIVER'  , 'database_driver');
 define('DB_HOSTNAME', 'hostame');
 
-use DBConnector\DBConnect;
-
 $dbh = DBConnect::getInstance();
 
 ```
-
-or as an **associative array**.
+Second one is through an **associative array**. In this case, you should use **`DBConfig`** class.
 
 ```php
 <?php
 
 require ('./vendor/autoload.php');
+
+use DBConnector\DBConfig;
+use DBConnector\DBConnect;
 
 $params = array(
     "db_username" => 'username',
@@ -45,21 +48,18 @@ $params = array(
     "db_hostname" => 'hostame'    
 );
 
-use DBConnector\DBConfig;
-use DBConnector\DBConnect;
-
 DBConfig::initiate($params);
 
 $dbh = DBConnect::getInstance();
 ```
 
-By default parameter `port` is empty. If you need to use specific port number you must define it:
+By default database parameter `db_port` is empty, thus database driver uses its own default port. If you need to use specific port number you must define it as a constant
 ```php
 <?php
 
 define('DB_PORT', 9999);
 ```
-or, in case if configuration parameters are definid as an associative array ...
+or as an associative array.
 ```php
 <?php
 
@@ -73,135 +73,214 @@ $params = array(
 
 ## Methods
 
-#### query(string $sql)
-Executes an SQL statement and returns a result set as a  PDOStatement object
+### exec(string $sql)
+Executes an SQL statement and returns the number of affected rows
+```php
+<?php
+
+// $dbh initialization
+
+$sql  = "DROP TABLE IF EXISTS test; ";
+$sql .= "CREATE TABLE test ( " ;
+$sql .=   "id INT NOT NULL AUTO_INCREMENT, ";
+$sql .=   "first_name VARCHAR(20) NOT NULL, ";
+$sql .=   "last_name VARCHAR(25) NOT NULL, ";
+$sql .=   "PRIMARY KEY(id)";
+$sql .= ") ENGINE=InnoDB DEFAULT CHARSET=UTF8";
+
+$dbh->exec($sql);
+
+$sql  = "INSERT INTO `test` (`first_name`, `last_name` ) VALUES ";
+$sql .= "('John', 'Doe'),('Jane', 'Smith')";
+
+$res = $dbh->exec($sql);
+echo "Records were inserted: $res" . PHP_EOL;
+```
+Output:
+```
+Records were inserted: 2
+```
+
+### query(string $sql)
+Executes an SQL statement and returns an DBConnect object with result set as a PDOStatement object. 
 
 For example, this code set UTF8 code
 ```php
 <?php
 
-$sql  = "DROP TABLE IF EXISTS test; ";
-$sql .= "CREATE TABLE test ( " ;
-$sql .=   "id INT NOT NULL AUTO_INCREMENT, ";
-$sql .=   "name VARCHAR(20) NOT NULL, ";
-$sql .=   "PRIMARY KEY(id)";
-$sql .= ") ENGINE=InnoDB DEFAULT CHARSET=UTF8";
-
+$sql = "SELECT * FROM `test`";
 $dbh->query($sql);
 
-```
-
-#### execute(string $sql, array $params)
-Prepares and executes SQL statement
-```php
-<?php
-$sql  = "INSERT INTO `test` (`name`) ";
-$sql .= "VALUES (:name)";
-
-$param = [
-    ':name' => 'John'
-];
-
-$dbh->execute($sql, $param);
-```
-
-#### getLastInsertedId()
-Returns Id from last inserted record
-```php
-<?php
-
-$id = $dbh->getLastInsertedId();
-echo "Id: $id" . PHP_EOL;
+var_dump($dbh);
 ```
 Output:
 ```
-Id: 1
+object(DBConnector\DBConnect)#1 (2) {
+  ["dbh":"DBConnector\DBConnect":private]=>
+  object(PDO)#2 (0) {
+  }
+  ["stmt":"DBConnector\DBConnect":private]=>
+  object(PDOStatement)#3 (1) {
+    ["queryString"]=>
+    string(20) "SELECT * FROM `test`"
+  }
+}
 ```
 
-#### getRow($fetch_method = null)
-Fetches a record from result set. Result depends on `$fetch_method`. By default uses `PDO::FETCH_ASSOC`
+ After this method you can chain another method that works with PDOStatement object. For example `getRow()`
+
+### getRow($fetch_style = null)
+Fetches a row from a result set. The `$fetch_style` determines how PDO returns the row. By default uses `PDO::FETCH_ASSOC`
 ```php
 <?php
+
 $sql = "SELECT * FROM `test`";
 $row = $dbh->query($sql)->getRow();
 var_dump($row);
+echo "Character: " . $person['first_name'] . " " . $person['last_name'] . PHP_EOL;
 ```
 Output:
 ```
-array(2) {
+array(3) {
   ["id"]=>
   string(1) "1"
-  ["name"]=>
+  ["first_name"]=>
   string(4) "John"
-
+  ["last_name"]=>
+  string(4) "Doe"
 }
+Character: John Doe
 ```
-For get result as an object use `PDO::FETCH_OBJ`
+For getting result as an *object* use `PDO::FETCH_OBJ`
 ```php
 <?php
 
 $sql = "SELECT * FROM `test`";
 $row = $dbh->query($sql)->getRow(PDO::FETCH_OBJ);
 var_dump($row);
+echo "Character: " . $person->first_name . " " . $person->last_name . PHP_EOL;
 ```
-
 Output:
 ```
-object(stdClass)#3 (2) {
+object(stdClass)#4 (3) {
   ["id"]=>
   string(1) "1"
-  ["name"]=>
+  ["first_name"]=>
   string(4) "John"
+  ["last_name"]=>
+  string(4) "Doe"
 }
+Character: John Doe
 ```
 
-#### getRows($fetch_method = null)
-Fetches records from result set. Result depends on `$fetch_method`. By
+### getRows($fetch_style = null)
+Returns an array containing all of the result set rows. Result depends on `$fetch_style`. By
 default uses `PDO::FETCH_ASSOC`
 
 ```php
 <?php
 
-$sql  = "INSERT INTO `test` (`name`) ";
-$sql .= "VALUES (:name)";
-
-$param = [
-    ':name' => 'Jane'
-];
-
-$dbh->execute($sql, $param);
-
 $sql = "SELECT * FROM `test`";
-$rows = $dbh->query($sql)->getRows();
+$persons = $dbh->query($sql)->getRows();
 
-var_dump($rows);
-```
-```
-array(2) {
-  [0]=>
-  array(2) {
-    ["id"]=>
-    string(1) "1"
-    ["name"]=>
-    string(4) "John"
-  }
-  [1]=>
-  array(2) {
-    ["id"]=>
-    string(1) "2"
-    ["name"]=>
-    string(4) "Jane"
-  }
+foreach($persons as $person) {
+    echo "Character: " . $person['first_name'] . " " . $person['last_name'] . PHP_EOL;
 }
 ```
 
-#### getFieldValue(string $field_name)
-Returns value of particular field
+```
+Character: John Doe
+Character: Jane Smith
+```
+
+### prepare(string $sql, $standalone = false)
+ Prepares an SQL statement for execution and returns DBConnect object that contains prepared PDOstatement.
+```php
+<?php
+$sql  = "INSERT INTO `test` (`first_name`, `last_name`) ";
+$sql .= "VALUES (:first_name, :last_name)";
+
+$stmt = $dbh->prepare($sql);
+var_dump($stmt)
+```
+Output:
+```
+object(DBConnector\DBConnect)#1 (2) {
+  ["dbh":"DBConnector\DBConnect":private]=>
+  object(PDO)#2 (0) {
+  }
+  ["stmt":"DBConnector\DBConnect":private]=>
+  object(PDOStatement)#3 (1) {
+    ["queryString"]=>
+    string(79) "INSERT INTO `test` (`first_name`, `last_name`) VALUES (:first_name, :last_name)"
+  }
+}
+```
+If you set `$standalone=true`, this method returns a **PDOstatement** object rather than **DBConnect** object.
+```php
+$sql  = "INSERT INTO `test` (`first_name`, `last_name`) ";
+$sql .= "VALUES (:first_name, :last_name)";
+
+$stmt = $dbh->prepare($sql, true);
+var_dump($stmt)
+```
+Output
+```
+object(PDOStatement)#3 (1) {
+  ["queryString"]=>
+  string(79) "INSERT INTO `test` (`first_name`, `last_name`) VALUES (:first_name, :last_name)"
+}
+```
+### execute(array $params, $stmt = null)
+Executes a prepared statement.
+```php
+<?php
+$sql  = "INSERT INTO `test` (`fist_name`, `last_name`) ";
+$sql .= "VALUES (:first_name, :lst_name)";
+
+$param = [
+    ':first_name' => 'Fhil',
+    ':last_name'  => 'Johnson'
+];
+
+$dbh->prepare($sql)->execute($param);
+```
+If you set `$stmt` parameter this method will execute **standalone** prepared statement.
+
+```php
+<?php
+
+```
+
+### getLastInsertedId()
+Returns Id from last inserted record
+```php
+<?php
+$sql  = "INSERT INTO `test` (`fist_name`, `last_name`) ";
+$sql .= "VALUES (:first_name, :last_name)";
+
+$param = [
+    ':first_name' => 'Fhil',
+    ':last_name'  => 'Johnson'
+];
+
+$dbh->prepare($sql)->execute($param);
+
+$id = $dbh->getLastInsertedId();
+echo "Id: $id" . PHP_EOL;
+```
+Output:
+```
+Id: 3
+```
+
+### getFieldValue(string $field_name)
+Returns a value of a given field
 ```php
 <?php
 
 $sql = "SELECT * FROM `test` WHERE `id` = 1";
-$name = $dbh->query($sql)->getFieldValue('name');
+$name = $dbh->query($sql)->getFieldValue('first_name');
 
 echo "Name: $name" . PHP_EOL;
 ```
@@ -209,28 +288,57 @@ Output:
 ```
 Name: John
 ```
-#### rowCount()
-Returns the number of rows affected by the last SQL statement
+### getFieldValues(string $field_name)
+Returns an array that contains values from given field
+
+```php
+<?php
+
+$sql = "SELECT * FROM `test`";
+
+$names = $dbh->query($sql)->getFieldValues('first_name');
+
+print_r($names); 
+
+```
+Output:
+
+```
+Array
+(
+    [0] => John
+    [1] => Jane
+    [2] => Fhil
+)
+```
+
+### rowCount()
+Returns the number of rows affected by the last SQL statement.
 ```php
 <? php
 
-$sql = "DELETE FROM `test`";
+$sql = "SELECT *  FROM `test`";
 $count = $dbh->query($sql)->rowCount();
 echo "Count: $count" . PHP_EOL;
 ```
 Output:
 ```
-Count: 2
+Count: 3
 ```
-#### getAvailableDrivers()
-Returns an array of available PDO drivers
+
+### closeCursor()
+Closes cursor for next execution.
+
+
+### getAvailableDrivers()
+Returns an array of available PDO drivers.
 ```php
 <?php
 
 $drivers = $dbh->getAvailableDrivers();
 print_r($drivers);
 ```
-Output
+Output:
 ```
 Array
 (
