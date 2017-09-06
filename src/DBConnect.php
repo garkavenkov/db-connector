@@ -95,12 +95,12 @@ class DBConnect
             $db_password = DBConfig::get('db_password');
         }
 
-        // DNS
-        $dns = DBConfig::getDNS($db_hostname, $db_driver, $db_port, $db_schema);
+        // DSN
+        $dsn = DBConfig::getDSN($db_hostname, $db_driver, $db_port, $db_schema);
 
         // Connect to the database
         try {
-            $this->dbh = new \PDO($dns, $db_username, $db_password);
+            $this->dbh = new \PDO($dsn, $db_username, $db_password);
             $this->dbh->setAttribute(
                 \PDO::ATTR_ERRMODE,
                 \PDO::ERRMODE_EXCEPTION

@@ -78,14 +78,14 @@ class DBConfig
     }
 
     /**
-     * Makes DNS
+     * Makes DSN
      * @param  string $db_hostname Database hostname
      * @param  string $db_driver   Database driver name
      * @param  int    $db_port     Database port
      * @param  string $db_schema   Database name
-     * @return string              DNS
+     * @return string              DSN
      */
-    public static function getDNS($db_hostname = null, $db_driver = null, $db_port = null, $db_schema = null)
+    public static function getDSN($db_hostname = null, $db_driver = null, $db_port = null, $db_schema = null): string
     {
         try {
             // Check whether $db_hostname is set
@@ -131,24 +131,24 @@ class DBConfig
 
             // Make DNS
             if ($db_driver === 'mysql') {
-                $dns =  $db_driver .
+                $dsn =  $db_driver .
                         ":host=" .
                         $db_hostname;
 
                 $db_port = empty($db_port) ? "" : (":" . $db_port) ;
 
-                $dns .= $db_port .
+                $dsn .= $db_port .
                         ";dbname=" .
                         $db_schema;
             } elseif ($db_driver === 'sqlite') {
                 // In case database type is sqlite,
                 // 'dbname' param stores path to the database file.
-                $dns =  $db_driver . ':'. $db_schema;
+                $dsn =  $db_driver . ':'. $db_schema;
             } else {
                 throw new \Exception("Database type '". self::$db_params['db_type'] . "' does not support yet.");
             }
 
-            return $dns;
+            return $dsn;
         } catch (\Exception $e) {
             die('Error: ' . $e->getMessage());
         }
