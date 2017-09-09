@@ -145,7 +145,7 @@ class DBConfig
                 // 'dbname' param stores path to the database file.
                 $dsn =  $db_driver . ':'. $db_schema;
             } else {
-                throw new \Exception("Database type '". self::$db_params['db_type'] . "' does not support yet.");
+                throw new \Exception("Database type '". self::$db_params['db_driver'] . "' does not support yet.");
             }
 
             return $dsn;
