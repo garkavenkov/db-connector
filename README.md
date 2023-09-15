@@ -25,7 +25,7 @@ define('DB_USERNAME', 'username');
 define('DB_PASSWORD', 'password');
 define('DB_SCHEMA'  , 'schema_name');
 define('DB_DRIVER'  , 'database_driver');
-define('DB_HOSTNAME', 'hostame');
+define('DB_HOSTNAME', 'hostname');
 
 use DBConnector\DBConnect;
 
