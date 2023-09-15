@@ -329,7 +329,7 @@ class DBConnect
     {
         try {
             return $this->dbh->getAvailableDrivers();
-        } catch (\PDException $e) {
+        } catch (\PDOException $e) {
             die("Error: " . $e->getMessage());
         }
     }
@@ -348,7 +348,7 @@ class DBConnect
      *
      * @return void
      */
-    private function __wakeup()
+    public function __wakeup()
     {
     }
 }

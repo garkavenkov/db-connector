@@ -85,7 +85,7 @@ class DBConfig
      * @param  string $db_schema   Database name
      * @return string              DSN
      */
-    public static function getDSN($db_hostname = null, $db_driver = null, $db_port = null, $db_schema = null): string
+    public static function getDSN($db_hostname = null, $db_driver = null, $db_port = null, $db_schema = null): string    
     {
         try {
             // Check whether $db_hostname is set
@@ -129,7 +129,7 @@ class DBConfig
                 }
             }
 
-            // Make DNS
+            // Make DSN
             if ($db_driver === 'mysql') {
                 $dsn =  $db_driver .
                         ":host=" .

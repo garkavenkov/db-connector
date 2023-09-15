@@ -27,6 +27,8 @@ define('DB_SCHEMA'  , 'schema_name');
 define('DB_DRIVER'  , 'database_driver');
 define('DB_HOSTNAME', 'hostame');
 
+use DBConnector\DBConnect;
+
 $dbh = DBConnect::getInstance();
 
 ```
@@ -45,7 +47,7 @@ $params = array(
     "db_password" => 'password',
     "db_schema"   => 'schema_name',
     "db_driver"   => 'database_driver',
-    "db_hostname" => 'hostame'    
+    "db_hostname" => 'hostname'    
 );
 
 DBConfig::initiate($params);
@@ -274,8 +276,8 @@ Output:
 Id: 3
 ```
 
-### getFieldValue(string $field_name)
-Returns a value of a given field
+#### getFieldValue(string $field_name)
+Returns value of particular field
 ```php
 <?php
 
