@@ -1,6 +1,5 @@
 # db-connector
 **DBConnect** - Class-wrapper for PDO Class.   
-**DBConfig**  - Class-initializator for database configuration.
 
 ## Installation
 
@@ -32,14 +31,13 @@ use DBConnector\DBConnect;
 $dbh = DBConnect::getInstance();
 
 ```
-Second one is through an **associative array**. In this case, you should use **`DBConfig`** class.
+Second one is through an **associative array** as a parameter in **getInstance()** method.
 
 ```php
 <?php
 
 require ('./vendor/autoload.php');
 
-use DBConnector\DBConfig;
 use DBConnector\DBConnect;
 
 $params = array(
@@ -50,9 +48,7 @@ $params = array(
     "db_hostname" => 'hostname'    
 );
 
-DBConfig::initiate($params);
-
-$dbh = DBConnect::getInstance();
+$dbh = DBConnect::getInstance($params);
 ```
 
 By default database parameter `db_port` is empty, thus database driver uses its own default port. If you need to use specific port number you must define it as a constant

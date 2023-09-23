@@ -2,8 +2,6 @@
 
 namespace DBConnector;
 
-use DBConnector\DBConfig;
-
 /**
  * Class: DBConnect
  *
@@ -14,6 +12,15 @@ use DBConnector\DBConfig;
  */
 class DBConnect
 {
+    /**
+     * Database's ports by default
+     *
+     * @var array
+     */
+    private static $default_ports = array(
+        'mysql' =>  3306
+    );
+
     /**
      * Database handler
      *
@@ -40,73 +47,123 @@ class DBConnect
      *
      * @return self     Singleton instance
      */
-    public static function getInstance()
+    public static function getInstance($params = [])
     {
         if (!(self::$conn instanceof self)) {
-            self::$conn = new self();
+            self::$conn = new self($params);
         }
         return self::$conn;
     }
 
     /**
+     * Makes DSN
+     * @param  string $db_hostname Database hostname
+     * @param  string $db_driver   Database driver name
+     * @param  int    $db_port     Database port
+     * @param  string $db_schema   Database name
+     * @return string              Data Source Name
+     */
+    private static function getDSN($db_hostname = null, $db_driver = null, $db_port = null, $db_schema = null): string    
+    {
+        try {            
+            // Make DSN
+            if ($db_driver === 'mysql') {
+                if (is_null($db_hostname)) {
+                    throw new \Exception('Database host not set');                    
+                }                
+                $dsn =  $db_driver .
+                        ":host=" .
+                        $db_hostname;
+
+                $db_port = empty($db_port) ? "" : (":" . $db_port) ;
+
+                $dsn .= $db_port .
+                        ";dbname=" .
+                        $db_schema;
+            } elseif ($db_driver === 'sqlite') {
+                // In case database type is sqlite,
+                // 'db_name' param stores path to the database file.
+                $dsn =  $db_driver . ':'. $db_schema;
+            } else {
+                throw new \Exception("Database type '". $db_driver . "' does not support yet.");
+            }            
+            return $dsn;
+        } catch (\Exception $e) {
+            die('Error: ' . $e->getMessage());
+        }
+
+        return false;
+    }
+
+    /**
      * Creates a PDO connection
      */
-    private function __construct()
-    {
-        // Database driver
-        if (defined('DB_DRIVER')) {
-            $db_driver = DB_DRIVER;
-        } else {
-            $db_driver = DBConfig::get('db_driver');
-        }
-
-        // Database hostname
-        if (defined('DB_HOSTNAME')) {
-            $db_hostname = DB_HOSTNAME;
-        } else {
-            $db_hostname = DBConfig::get('db_hostname');
-        }
-
-        // Database port
-        if (defined('DB_PORT')) {
-            $db_port = DB_PORT;
-        } else {
-            $db_port = DBConfig::get('db_port');
-        }
-
-        // Database schema name
-        if (defined('DB_SCHEMA')) {
-            $db_schema = DB_SCHEMA;
-        } else {
-            $db_schema = DBConfig::get('db_schema');
-        }
-
-        // Database user name
-        if (defined('DB_USERNAME')) {
-            $db_username = DB_USERNAME;
-        } else {
-            $db_username = DBConfig::get('db_username');
-        }
-
-        // Database user password
-        if (defined('DB_PASSWORD')) {
-            $db_password = DB_PASSWORD;
-        } else {
-            $db_password = DBConfig::get('db_password');
-        }
-
-        // DSN
-        $dsn = DBConfig::getDSN($db_hostname, $db_driver, $db_port, $db_schema);
-
-        // Connect to the database
+    private function __construct($params = [])
+    {   
         try {
+
+            // Database driver
+            if (defined('DB_DRIVER')) {
+                $db_driver = DB_DRIVER;
+            } elseif (isset($params['DB_DRIVER'])) {
+                $db_driver = $params['DB_DRIVER'];
+            } else {
+                throw new \Exception('Database driver not set');
+            }                
+            
+            // Database hostname
+            if (defined('DB_HOSTNAME')) {
+                $db_hostname = DB_HOSTNAME;
+            } elseif (isset($params['DB_HOSTNAME'])) {
+                $db_hostname = $params['DB_HOSTNAME'];
+            } else {
+                $db_hostname = null;                
+            }             
+            
+            // Database port
+            if (defined('DB_PORT')) {
+                $db_port = DB_PORT;
+            } elseif (isset($params['DB_PORT'])) {
+                $db_port = $params['DB_PORT'];
+            } else {
+                $db_port = isset(self::$default_ports[$db_driver]) ? self::$default_ports[$db_driver] : null;
+            }                
+            
+            // Database schema name
+            if (defined('DB_SCHEMA')) {
+                $db_schema = DB_SCHEMA;
+            } elseif (isset($params['DB_SCHEMA'])) {
+                $db_schema = $params['DB_SCHEMA'];
+            } else {
+                throw new \Exception('Database name need to be set!');
+            }
+
+            // Database user name
+            if (defined('DB_USERNAME')) {
+                $db_username = DB_USERNAME;
+            } elseif (isset($params['DB_USERNAME'])) {
+                $db_username = $params['DB_USERNAME'];
+            } else {
+                $db_username = null;
+            }            
+            
+            // Database user password
+            if (defined('DB_PASSWORD')) {
+                $db_password = DB_PASSWORD;
+            } elseif (isset($params['DB_PASSWORD']))  {
+                $db_password = $params['DB_PASSWORD'];
+            } else {
+                $db_password = null;                
+            }
+            
+            $dsn = self::getDSN($db_hostname, $db_driver, $db_port, $db_schema);                        
             $this->dbh = new \PDO($dsn, $db_username, $db_password);
-            $this->dbh->setAttribute(
-                \PDO::ATTR_ERRMODE,
-                \PDO::ERRMODE_EXCEPTION
-            );
-        } catch (\PDOException $e) {
-            die("Error: " . $e->getMessage());
+            $this->dbh->setAttribute( \PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            
+        } catch(\PDOException $e) {
+            die('Error: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            die("Error: " . $e->getMessage());            
         }
     }
 
@@ -165,7 +222,7 @@ class DBConnect
      * @return array  Records from result set depending on PDO fetch style
      */
     public function getRows($fetch_style = null)
-    {
+    {        
         if (is_null($fetch_style)) {
             $fetch_style = \PDO::FETCH_ASSOC;
         }
