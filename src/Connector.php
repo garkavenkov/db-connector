@@ -1,6 +1,6 @@
 <?php
 
-namespace DB\Connector;
+namespace DB\Connection;
 
 /**
  * Class: Connector

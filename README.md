@@ -1,5 +1,5 @@
 # db-connector
-**DBConnect** - Class-wrapper for PDO Class.   
+**Connect** - Class-wrapper for PDO Class.   
 
 ## Installation
 
@@ -18,7 +18,7 @@ There are two ways to set database configuration parameters. First one is throug
 
 require ('./vendor/autoload.php');
 
-use DB\Connector\Connector;
+use DB\Connection\Connector;
 
 define('DB_USERNAME', 'username');
 define('DB_PASSWORD', 'password');
@@ -36,7 +36,7 @@ Second one is through an **associative array** as a parameter in **getInstance()
 
 require ('./vendor/autoload.php');
 
-use DB\Connector\Connector;
+use DB\Connection\Connector;
 
 $params = array(
     "DB_USERNAME" => 'username',
@@ -49,7 +49,7 @@ $params = array(
 $dbh = Connector::getInstance($params);
 ```
 
-By default database parameter `db_port` is empty, thus database driver uses its own default port. If you need to use specific port number you must define it as a constant
+By default database parameter `DB_PORT` is empty, thus database driver uses its own default port. If you need to use specific port number you must define it as a constanе
 ```php
 <?php
 
@@ -63,7 +63,7 @@ $params = array(
     .
     .
     .
-    "db_port" => 9999
+    "DB_PORT" => 9999
 );
 ```
 
