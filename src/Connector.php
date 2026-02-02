@@ -1,16 +1,16 @@
 <?php
 
-namespace DBConnector;
+namespace DB\Connector;
 
 /**
- * Class: DBConnect
+ * Class: Connector
  *
  * Wrapper for PDO connection to the database
  *
- * @package DBConnector
+ * @package db-connector
  * @author  Maksim Garkavenkov <maksim.garkavenkov@gmail.com>
  */
-class DBConnect
+class Connector
 {
     /**
      * Database's ports by default
@@ -104,7 +104,7 @@ class DBConnect
 
             // Database driver
             if (defined('DB_DRIVER')) {
-                $db_driver = DB_DRIVER;
+                $db_driver = constant('DB_DRIVER');
             } elseif (isset($params['DB_DRIVER'])) {
                 $db_driver = $params['DB_DRIVER'];
             } else {
@@ -113,7 +113,7 @@ class DBConnect
             
             // Database hostname
             if (defined('DB_HOSTNAME')) {
-                $db_hostname = DB_HOSTNAME;
+                $db_hostname = constant('DB_HOSTNAME');
             } elseif (isset($params['DB_HOSTNAME'])) {
                 $db_hostname = $params['DB_HOSTNAME'];
             } else {
@@ -122,7 +122,7 @@ class DBConnect
             
             // Database port
             if (defined('DB_PORT')) {
-                $db_port = DB_PORT;
+                $db_port = constant('DB_PORT');
             } elseif (isset($params['DB_PORT'])) {
                 $db_port = $params['DB_PORT'];
             } else {
@@ -131,7 +131,7 @@ class DBConnect
             
             // Database schema name
             if (defined('DB_SCHEMA')) {
-                $db_schema = DB_SCHEMA;
+                $db_schema = constant('DB_SCHEMA');
             } elseif (isset($params['DB_SCHEMA'])) {
                 $db_schema = $params['DB_SCHEMA'];
             } else {
@@ -140,7 +140,7 @@ class DBConnect
 
             // Database user name
             if (defined('DB_USERNAME')) {
-                $db_username = DB_USERNAME;
+                $db_username = constant('DB_USERNAME');
             } elseif (isset($params['DB_USERNAME'])) {
                 $db_username = $params['DB_USERNAME'];
             } else {
@@ -149,7 +149,7 @@ class DBConnect
             
             // Database user password
             if (defined('DB_PASSWORD')) {
-                $db_password = DB_PASSWORD;
+                $db_password = constant('DB_PASSWORD');
             } elseif (isset($params['DB_PASSWORD']))  {
                 $db_password = $params['DB_PASSWORD'];
             } else {

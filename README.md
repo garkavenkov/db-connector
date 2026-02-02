@@ -18,7 +18,7 @@ There are two ways to set database configuration parameters. First one is throug
 
 require ('./vendor/autoload.php');
 
-use DBConnector\DBConnect;
+use DB\Connector\Connector;
 
 define('DB_USERNAME', 'username');
 define('DB_PASSWORD', 'password');
@@ -26,9 +26,7 @@ define('DB_SCHEMA'  , 'schema_name');
 define('DB_DRIVER'  , 'database_driver');
 define('DB_HOSTNAME', 'hostname');
 
-use DBConnector\DBConnect;
-
-$dbh = DBConnect::getInstance();
+$dbh = Connector::getInstance();
 
 ```
 Second one is through an **associative array** as a parameter in **getInstance()** method.
@@ -38,17 +36,17 @@ Second one is through an **associative array** as a parameter in **getInstance()
 
 require ('./vendor/autoload.php');
 
-use DBConnector\DBConnect;
+use DB\Connector\Connector;
 
 $params = array(
-    "db_username" => 'username',
-    "db_password" => 'password',
-    "db_schema"   => 'schema_name',
-    "db_driver"   => 'database_driver',
-    "db_hostname" => 'hostname'    
+    "DB_USERNAME" => 'username',
+    "DB_PASSWORD" => 'password',
+    "DB_SCHEMA"   => 'schema_name',
+    "DB_DRIVER"   => 'database_driver',
+    "DB_HOSTNAME" => 'hostname'    
 );
 
-$dbh = DBConnect::getInstance($params);
+$dbh = Connector::getInstance($params);
 ```
 
 By default database parameter `db_port` is empty, thus database driver uses its own default port. If you need to use specific port number you must define it as a constant
